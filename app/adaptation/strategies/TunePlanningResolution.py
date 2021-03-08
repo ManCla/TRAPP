@@ -1,4 +1,7 @@
+import matplotlib  
+matplotlib.use('TkAgg') 
 import matplotlib.pyplot as plt
+
 from numpy import mean
 from app.adaptation.Strategy import Strategy
 from app.adaptation.Util import *
