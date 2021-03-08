@@ -45,7 +45,7 @@ TRAPP framework for Traffic Reconfiguration via Adaptive Participatory Planning
 
 1. If `setuptools` are not installed in your system, [install](https://pypi.org/project/setuptools/) them.
 
-1. Install the python dependencies of TRAPP by issuing (inside the newly created TRAPP folder): `python setup.py install`
+1. Install the python dependencies of TRAPP by issuing (inside the newly created TRAPP folder): `python setup.py install`. *NOTE*This is likely not to work due to python2 being dismissed: manually installing the requirements helps.
 
 1. Download the [0.0.1 release of EPOS](https://github.com/epournaras/EPOS/releases/tag/0.0.1) and unzip it. Note the path to the path in the unzipped folder.
 
