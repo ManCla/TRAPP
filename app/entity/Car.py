@@ -17,7 +17,7 @@ class Car:
 
     preferences_list= ["min_length", "max_speed", "balanced"]
 
-    def __init__(self, id):
+    def __init__(self, id, cr):
         # the string id
         self.id = id  # type: str
         # the rounds this car already drove
@@ -51,20 +51,19 @@ class Car:
 
         self.driver_preference = [key for key, value in sorted(history_prefs[self.id].iteritems(), key=lambda (k,v): (v,k))][0]
 
+        self.carreg = cr
+
     def setArrived(self, tick):
         """ car arrived at its target, so we add some statistic data """
-
-        # import here because python can not handle circular-dependencies
-        from app.entity.CarRegistry import CarRegistry
 
         self.lastRerouteCounter = 0
         if self.smartCar:  # as we ignore the first 1000 ticks for this
             # add a route to the global registry
-            CarRegistry.totalTrips += 1
+            self.carreg.totalTrips += 1
             # add the duration for this route to the global tripAverage
             durationForTrip = (tick - self.currentRouteBeginTick)
-            CarRegistry.totalTripAverage = addToAverage(CarRegistry.totalTrips,  # 100 for faster updates
-                                                        CarRegistry.totalTripAverage,
+            self.carreg.totalTripAverage = addToAverage(self.carreg.totalTrips,  # 100 for faster updates
+                                                        self.carreg.totalTripAverage,
                                                         durationForTrip)
 
             minimalCosts = CustomRouter.minimalRoute(self.sourceID, self.targetID).totalCost
@@ -78,8 +77,8 @@ class Car:
                     tripOverhead))
                 tripOverhead = 30
 
-            CarRegistry.totalTripOverheadAverage = addToAverage(CarRegistry.totalTrips,
-                                                                CarRegistry.totalTripOverheadAverage,
+            self.carreg.totalTripOverheadAverage = addToAverage(self.carreg.totalTrips,
+                                                                self.carreg.totalTripOverheadAverage,
                                                                 tripOverhead)
 
             CSVLogger.logEvent("overheads", [tick, self.sourceID, self.targetID, self.rounds, durationForTrip,
@@ -225,9 +224,7 @@ class Car:
 
 
     def find_occupancy_for_route(self, meta):
-
-        from app.entity.CarRegistry import CarRegistry
-
+        
         interval = Knowledge.planning_step_horizon
         all_streets = []
         trip_time = 0
@@ -235,7 +232,7 @@ class Car:
         streets_for_interval = {}
         all_streets.append(streets_for_interval)
 
-        vehicle_length = CarRegistry.vehicle_length
+        vehicle_length = self.carreg.vehicle_length
 
         for m in meta:
             time =  m["length"]/ m["maxSpeed"]
