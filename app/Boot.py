@@ -12,6 +12,10 @@ import Config
 import traci, sys
 import random
 
+#for logging
+from datetime import datetime
+import csv
+
 
 def start(processID, parallelMode,useGUI):
 
@@ -61,9 +65,11 @@ def start_multiple(processID, parallelMode,useGUI):
         # create simulation object
         s = Simulation(cr)
         # Start the simulation
-        s.start()
+        avg_ovh = s.start()
+        print avg_ovh
         # Simulation ended, so we shutdown
         traci.close()
+        return avg_ovh
 
     """ main entry point into the application """
     Config.parallelMode = parallelMode
@@ -72,7 +78,7 @@ def start_multiple(processID, parallelMode,useGUI):
     info('#####################################', Fore.CYAN)
     info('#        Starting TRAPP v0.1        #', Fore.CYAN)
     info('#####################################', Fore.CYAN)
-
+    
     # Check if sumo is installed and available
     SUMODependency.checkDeps()
     info('# SUMO-Dependency check OK!', Fore.GREEN)
@@ -82,9 +88,19 @@ def start_multiple(processID, parallelMode,useGUI):
     info(Fore.GREEN + "# Map loading OK! " + Fore.RESET)
     info(Fore.CYAN + "# Nodes: " + str(Network.nodesCount()) + " / Edges: " + str(Network.edgesCount()) + Fore.RESET)
         
+    ## open file for logging
+    filename = "average_overhead_"+str(datetime.now())+".csv"
+    csvfile = open(filename,'w')
+    fieldnames = ['sim_number', 'avgTripOverhead']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writeheader()
+
+    # loop for repeated simulations    
     for i in range(0, Config.num_sims):
         info(Fore.RED + '\n # Running simulation number '+ str(i+1) +'\n' + Fore.RESET)
-        run_single()
+        adpt_performance = run_single()
+        writer.writerow({'sim_number': str(i), 'avgTripOverhead': adpt_performance})
+
 
     info("\n# finished simulations", Fore.GREEN)
     info(Fore.RED + '# Shutdown' + Fore.RESET)

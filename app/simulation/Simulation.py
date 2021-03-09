@@ -8,7 +8,6 @@ from colorama import Fore
 from app import Config
 from app.entity.CarRegistry import CarRegistry
 from app.logging import info
-#from app.routing.CustomRouter import CustomRouter
 import time
 
 from app.logging import CSVLogger
@@ -81,7 +80,7 @@ class Simulation(object):
                 cars_to_indexes["car-" + str(i)] = i
             self.carreg.run_epos_apply_results(True, cars_to_indexes, 0)
 
-        self.loop()
+        return self.loop()
 
     # @profile
     def loop(self):
@@ -115,10 +114,11 @@ class Simulation(object):
 
             if Config.simulation_horizon == self.tick:
                 print("Simulation horizon reached!")
-                return
+                return str(self.carreg.totalTripOverheadAverage)
 
             if (self.tick % Config.adaptation_period) == 0:
                 perform_adaptation(self.tick)
 
             if (self.tick % Knowledge.planning_period) == 0:
                 self.carreg.do_epos_planning(self.tick)
+
