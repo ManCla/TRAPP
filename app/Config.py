@@ -3,7 +3,7 @@
 ######################################
 
 # True if we want to use the SUMO GUI
-sumoUseGUI = True
+sumoUseGUI = False
 
 # True for printing extra info
 debug = False
