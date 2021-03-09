@@ -63,7 +63,6 @@ def start_multiple(processID, parallelMode,useGUI):
         # Start the simulation
         s.start()
         # Simulation ended, so we shutdown
-        info(Fore.RED + '# Shutdown' + Fore.RESET)
         traci.close()
 
     """ main entry point into the application """
@@ -83,12 +82,12 @@ def start_multiple(processID, parallelMode,useGUI):
     info(Fore.GREEN + "# Map loading OK! " + Fore.RESET)
     info(Fore.CYAN + "# Nodes: " + str(Network.nodesCount()) + " / Edges: " + str(Network.edgesCount()) + Fore.RESET)
         
-    info("\n# starting first simulation", Fore.GREEN)
-    run_single()
-    info("\n# starting second simulation", Fore.GREEN)
-    run_single()
-    info("\n# finished simulations", Fore.GREEN)
+    for i in range(0, Config.num_sims):
+        info(Fore.RED + '\n # Running simulation number '+ str(i+1) +'\n' + Fore.RESET)
+        run_single()
 
+    info("\n# finished simulations", Fore.GREEN)
+    info(Fore.RED + '# Shutdown' + Fore.RESET)
 
     sys.stdout.flush()
     return None

@@ -11,6 +11,8 @@ debug = False
 # which seed to be used in the random functions, for repeatability
 random_seed = 1
 
+num_sims = 3
+
 # The path to EPOS jar that is called from Python for planning
 # <path to EPOS jar>
 epos_jar_path = "/Users/claudio/repositories-git/TRAPP/EPOS/release-0.0.1/epos-tutorial.jar"
