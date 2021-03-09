@@ -8,7 +8,7 @@ from colorama import Fore
 from app import Config
 from app.entity.CarRegistry import CarRegistry
 from app.logging import info
-from app.routing.CustomRouter import CustomRouter
+#from app.routing.CustomRouter import CustomRouter
 import time
 
 from app.logging import CSVLogger
@@ -29,16 +29,19 @@ class Simulation(object):
     # last tick time
     lastTick = current_milli_time()
 
+    def __init__(self, cstmrtr):
+        self.cr = cstmrtr # custom router object of this simulaiton
+
     def applyFileConfig(self):
         """ reads configs from a json and applies it at realtime to the simulation """
         try:
             config = json.load(open('./knobs.json'))
-            CustomRouter.explorationPercentage = config['explorationPercentage']
-            CustomRouter.averageEdgeDurationFactor = config['averageEdgeDurationFactor']
-            CustomRouter.maxSpeedAndLengthFactor = config['maxSpeedAndLengthFactor']
-            CustomRouter.freshnessUpdateFactor = config['freshnessUpdateFactor']
-            CustomRouter.freshnessCutOffValue = config['freshnessCutOffValue']
-            CustomRouter.reRouteEveryTicks = config['reRouteEveryTicks']
+            cr.explorationPercentage = config['explorationPercentage']
+            cr.averageEdgeDurationFactor = config['averageEdgeDurationFactor']
+            cr.maxSpeedAndLengthFactor = config['maxSpeedAndLengthFactor']
+            cr.freshnessUpdateFactor = config['freshnessUpdateFactor']
+            cr.freshnessCutOffValue = config['freshnessCutOffValue']
+            cr.reRouteEveryTicks = config['reRouteEveryTicks']
         except:
             pass
 
@@ -63,7 +66,7 @@ class Simulation(object):
         info("# Start adding initial cars to the simulation", Fore.MAGENTA)
         # apply the configuration from the json file
         self.applyFileConfig()
-        self.carreg.applyCarCounter()
+        self.carreg.applyCarCounter(self.cr)
 
         if Config.start_with_epos_optimization:
             Knowledge.time_of_last_EPOS_invocation = 0
@@ -104,7 +107,7 @@ class Simulation(object):
 
             CSVLogger.logEvent("streets", [self.tick] + [traci.edge.getLastStepVehicleNumber(edge.id)*self.carreg.vehicle_length / edge.length for edge in Network.routingEdges])
 
-            if (self.tick % 50) == 0:
+            if (self.tick % 10) == 0:
                 info("Simulation -> Step:" + str(self.tick) + " # Driving cars: " + str(
                     traci.vehicle.getIDCount()) + "/" + str(
                     self.carreg.totalCarCounter) + " # avgTripOverhead: " + str(

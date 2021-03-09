@@ -6,7 +6,7 @@ import csv
 from app.Util import addToAverage
 from app.logging import CSVLogger
 from app.network.Network import Network
-from app.routing.CustomRouter import CustomRouter
+#from app.routing.CustomRouter import CustomRouter
 from app.routing.RouterResult import RouterResult
 from app.adaptation import Knowledge
 from app.entity.CarHistory import history_prefs
@@ -17,7 +17,7 @@ class Car:
 
     preferences_list= ["min_length", "max_speed", "balanced"]
 
-    def __init__(self, id, cr):
+    def __init__(self, id, cr, ctmrtr):
         # the string id
         self.id = id  # type: str
         # the rounds this car already drove
@@ -52,6 +52,7 @@ class Car:
         self.driver_preference = [key for key, value in sorted(history_prefs[self.id].iteritems(), key=lambda (k,v): (v,k))][0]
 
         self.carreg = cr
+        self.custmrout = ctmrtr
 
     def setArrived(self, tick):
         """ car arrived at its target, so we add some statistic data """
@@ -66,7 +67,7 @@ class Car:
                                                         self.carreg.totalTripAverage,
                                                         durationForTrip)
 
-            minimalCosts = CustomRouter.minimalRoute(self.sourceID, self.targetID).totalCost
+            minimalCosts = self.custmrout.minimalRoute(self.sourceID, self.targetID).totalCost
             tripOverhead = durationForTrip / minimalCosts / 1.1  # 1.6 is to correct acceleration and deceleration
             # when the distance is very short, we have no overhead
             if durationForTrip < 10:
@@ -101,11 +102,11 @@ class Car:
 
         try:
             if self.driver_preference=="min_length":
-                self.currentRouterResult = CustomRouter.route_by_min_length(self.sourceID, self.targetID)
+                self.currentRouterResult = self.custmrout.route_by_min_length(self.sourceID, self.targetID)
             elif self.driver_preference=="max_speed":
-                self.currentRouterResult = CustomRouter.route_by_max_speed(self.sourceID, self.targetID)
+                self.currentRouterResult = self.custmrout.route_by_max_speed(self.sourceID, self.targetID)
             else:
-                self.currentRouterResult = CustomRouter.minimalRoute(self.sourceID, self.targetID)
+                self.currentRouterResult = self.custmrout.minimalRoute(self.sourceID, self.targetID)
 
             if len(self.currentRouterResult.route) > 0:
                 traci.route.add(self.currentRouteID, self.currentRouterResult.route)
@@ -140,7 +141,7 @@ class Car:
 
     def create_epos_output_files(self, sourceID, targetID, tick, agent_ind):
 
-        router_res_length = CustomRouter.route_by_min_length(sourceID, targetID)
+        router_res_length = self.custmrout.route_by_min_length(sourceID, targetID)
         if len(router_res_length.route) > 0:
             self.create_output_files(
                 history_prefs[self.id]["min_length"],
@@ -148,7 +149,7 @@ class Car:
                 self.find_occupancy_for_route(router_res_length.meta),
                 agent_ind)
 
-        router_res_speeds = CustomRouter.route_by_max_speed(sourceID, targetID)
+        router_res_speeds = self.custmrout.route_by_max_speed(sourceID, targetID)
         if len(router_res_speeds.route) > 0:
             self.create_output_files(
                 history_prefs[self.id]["max_speed"],
@@ -156,7 +157,7 @@ class Car:
                 self.find_occupancy_for_route(router_res_speeds.meta),
                 agent_ind)
 
-        router_res_length_and_speeds = CustomRouter.minimalRoute(sourceID, targetID)
+        router_res_length_and_speeds = self.custmrout.minimalRoute(sourceID, targetID)
         if len(router_res_length_and_speeds.route) > 0:
             self.create_output_files(
                 history_prefs[self.id]["balanced"],

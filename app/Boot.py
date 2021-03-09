@@ -50,20 +50,21 @@ def start(processID, parallelMode,useGUI):
 
 def start_multiple(processID, parallelMode,useGUI):
     def run_single():
-        # After the network is loaded, we init the router
-        CustomRouter.init()
+
+        random.seed(Config.random_seed)
+        
         # Start sumo in the background
         SUMOConnector.start()
         info("\n# SUMO-Application started OK!", Fore.GREEN)
+        #create curstom router for simulation
+        cr = CustomRouter()
         # create simulation object
-        s1 = Simulation()
+        s = Simulation(cr)
         # Start the simulation
-        s1.start()
+        s.start()
         # Simulation ended, so we shutdown
         info(Fore.RED + '# Shutdown' + Fore.RESET)
         traci.close()
-
-    random.seed(Config.random_seed)
 
     """ main entry point into the application """
     Config.parallelMode = parallelMode
@@ -81,12 +82,13 @@ def start_multiple(processID, parallelMode,useGUI):
     Network.loadNetwork()
     info(Fore.GREEN + "# Map loading OK! " + Fore.RESET)
     info(Fore.CYAN + "# Nodes: " + str(Network.nodesCount()) + " / Edges: " + str(Network.edgesCount()) + Fore.RESET)
-
+        
     info("\n# starting first simulation", Fore.GREEN)
     run_single()
     info("\n# starting second simulation", Fore.GREEN)
     run_single()
     info("\n# finished simulations", Fore.GREEN)
+
 
     sys.stdout.flush()
     return None

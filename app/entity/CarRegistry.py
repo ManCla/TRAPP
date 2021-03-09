@@ -38,11 +38,11 @@ class CarRegistry(object):
 
     # @todo on shortest path possible -> minimal value
 
-    def applyCarCounter(self):
+    def applyCarCounter(self,custmrout):
         """ syncs the value of the carCounter to the SUMO simulation """
         while len(self.cars) < self.totalCarCounter:
             # to less cars -> add new
-            c = Car("car-" + str(self.carIndexCounter),self)
+            c = Car("car-" + str(self.carIndexCounter),self,custmrout)
             self.carIndexCounter += 1
             self.cars[c.id] = c
             c.addToSimulation(0, True)

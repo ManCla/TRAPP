@@ -35,7 +35,7 @@ sumoNet = "/Users/claudio/repositories-git/TRAPP/app/map/eichstaedt.net.xml"
 totalCarCounter = 500
 
 # How long the simulation will run
-simulation_horizon = 300
+simulation_horizon = 30
 
 ######################################
 ##### CONFIGURATION OF PLANNING ######
