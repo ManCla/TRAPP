@@ -11,4 +11,4 @@ if __name__ == "__main__":
     if processID is not None:
         parallelMode = False
         # Starting the application
-        Boot.start(processID, parallelMode, sumoUseGUI)
+        Boot.start_multiple(processID, parallelMode, sumoUseGUI)
