@@ -11,7 +11,7 @@ debug = False
 # which seed to be used in the random functions, for repeatability
 random_seed = 1
 
-num_sims = 2
+num_sims = 500
 
 # The path to EPOS jar that is called from Python for planning
 # <path to EPOS jar>
@@ -37,7 +37,7 @@ sumoNet = "/Users/claudio/repositories-git/TRAPP/app/map/eichstaedt.net.xml"
 totalCarCounter = 500
 
 # How long the simulation will run
-simulation_horizon = 30
+simulation_horizon = 500
 
 ######################################
 ##### CONFIGURATION OF PLANNING ######
@@ -55,7 +55,7 @@ planning_period = 50
 planning_steps = 1
 
 # how long a planning step should be
-planning_step_horizon = 50
+planning_step_horizon = 100
 
 # double from [0, 1], unfairness
 alpha = 0
