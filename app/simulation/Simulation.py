@@ -29,8 +29,7 @@ class Simulation(object):
     # last tick time
     lastTick = current_milli_time()
 
-    @classmethod
-    def applyFileConfig(cls):
+    def applyFileConfig(self):
         """ reads configs from a json and applies it at realtime to the simulation """
         try:
             config = json.load(open('./knobs.json'))
@@ -43,8 +42,7 @@ class Simulation(object):
         except:
             pass
 
-    @classmethod
-    def start(cls):
+    def start(self):
 
         Knowledge.planning_period = Config.planning_period
         Knowledge.planning_step_horizon = Config.planning_step_horizon
@@ -61,63 +59,63 @@ class Simulation(object):
         Util.prepare_epos_input_data_folders()
 
         """ start the simulation """
+        self.carreg = CarRegistry()
         info("# Start adding initial cars to the simulation", Fore.MAGENTA)
         # apply the configuration from the json file
-        cls.applyFileConfig()
-        CarRegistry.applyCarCounter()
+        self.applyFileConfig()
+        self.carreg.applyCarCounter()
 
         if Config.start_with_epos_optimization:
             Knowledge.time_of_last_EPOS_invocation = 0
-            CarRegistry.change_EPOS_config("conf/epos.properties", "numAgents=", "numAgents=" + str(Config.totalCarCounter))
-            CarRegistry.change_EPOS_config("conf/epos.properties", "planDim=", "planDim=" + str(Network.edgesCount() * Knowledge.planning_steps))
-            CarRegistry.change_EPOS_config("conf/epos.properties", "alpha=", "alpha=" + str(Knowledge.alpha))
-            CarRegistry.change_EPOS_config("conf/epos.properties", "beta=", "beta=" + str(Knowledge.beta))
-            CarRegistry.change_EPOS_config("conf/epos.properties", "globalCostFunction=", "globalCostFunction=" + str(Knowledge.globalCostFunction))
+            self.carreg.change_EPOS_config("conf/epos.properties", "numAgents=", "numAgents=" + str(Config.totalCarCounter))
+            self.carreg.change_EPOS_config("conf/epos.properties", "planDim=", "planDim=" + str(Network.edgesCount() * Knowledge.planning_steps))
+            self.carreg.change_EPOS_config("conf/epos.properties", "alpha=", "alpha=" + str(Knowledge.alpha))
+            self.carreg.change_EPOS_config("conf/epos.properties", "beta=", "beta=" + str(Knowledge.beta))
+            self.carreg.change_EPOS_config("conf/epos.properties", "globalCostFunction=", "globalCostFunction=" + str(Knowledge.globalCostFunction))
 
             cars_to_indexes = {}
             for i in range(Config.totalCarCounter):
                 cars_to_indexes["car-" + str(i)] = i
-            CarRegistry.run_epos_apply_results(True, cars_to_indexes, 0)
+            self.carreg.run_epos_apply_results(True, cars_to_indexes, 0)
 
-        cls.loop()
+        self.loop()
 
-    @classmethod
     # @profile
-    def loop(cls):
+    def loop(self):
         """ loops the simulation """
 
         # start listening to all cars that arrived at their target
         traci.simulation.subscribe((tc.VAR_ARRIVED_VEHICLES_IDS,))
         while 1:
 
-            if len(CarRegistry.cars) == 0:
+            if len(self.carreg.cars) == 0:
                 print("all cars reached their destinations")
                 return
 
             # Do one simulation step
-            cls.tick += 1
+            self.tick += 1
             traci.simulationStep()
 
             # Check for removed cars and re-add them into the system
             for removedCarId in traci.simulation.getSubscriptionResults()[122]:
                 if Config.debug:
-                    print str(removedCarId) + "\treached its destination at tick " + str(cls.tick)
-                CarRegistry.findById(removedCarId).setArrived(cls.tick)
+                    print str(removedCarId) + "\treached its destination at tick " + str(self.tick)
+                self.carreg.findById(removedCarId).setArrived(self.tick)
 
-            CSVLogger.logEvent("streets", [cls.tick] + [traci.edge.getLastStepVehicleNumber(edge.id)*CarRegistry.vehicle_length / edge.length for edge in Network.routingEdges])
+            CSVLogger.logEvent("streets", [self.tick] + [traci.edge.getLastStepVehicleNumber(edge.id)*self.carreg.vehicle_length / edge.length for edge in Network.routingEdges])
 
-            if (cls.tick % 100) == 0:
-                info("Simulation -> Step:" + str(cls.tick) + " # Driving cars: " + str(
+            if (self.tick % 50) == 0:
+                info("Simulation -> Step:" + str(self.tick) + " # Driving cars: " + str(
                     traci.vehicle.getIDCount()) + "/" + str(
-                    CarRegistry.totalCarCounter) + " # avgTripOverhead: " + str(
-                    CarRegistry.totalTripOverheadAverage), Fore.GREEN)
+                    self.carreg.totalCarCounter) + " # avgTripOverhead: " + str(
+                    self.carreg.totalTripOverheadAverage), Fore.GREEN)
 
-            if Config.simulation_horizon == cls.tick:
+            if Config.simulation_horizon == self.tick:
                 print("Simulation horizon reached!")
                 return
 
-            if (cls.tick % Config.adaptation_period) == 0:
-                perform_adaptation(cls.tick)
+            if (self.tick % Config.adaptation_period) == 0:
+                perform_adaptation(self.tick)
 
-            if (cls.tick % Knowledge.planning_period) == 0:
-                CarRegistry.do_epos_planning(cls.tick)
+            if (self.tick % Knowledge.planning_period) == 0:
+                self.carreg.do_epos_planning(self.tick)
