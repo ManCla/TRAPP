@@ -21,51 +21,49 @@ class NullCar:
 class CarRegistry(object):
     """ central registry for all our cars we have in the sumo simulation """
 
-    vehicle_length = 5
-    # the total amount of cars that should be in the system
-    totalCarCounter = Config.totalCarCounter
-    # always increasing counter for carIDs
-    carIndexCounter = 0
-    # list of all cars
-    cars = {}  # type: dict[str,app.entitiy.Car]
-    # counts the number of finished trips
-    totalTrips = 0
-    # average of all trip durations
-    totalTripAverage = 0
-    # average of all trip overheads (overhead is TotalTicks/PredictedTicks)
-    totalTripOverheadAverage = 0
+    def __init__(self):
+        self.vehicle_length = 5
+        # the total amount of cars that should be in the system
+        self.totalCarCounter = Config.totalCarCounter
+        # always increasing counter for carIDs
+        self.carIndexCounter = 0
+        # list of all cars
+        self.cars = {}  # type: dict[str,app.entitiy.Car]
+        # counts the number of finished trips
+        self.totalTrips = 0
+        # average of all trip durations
+        self.totalTripAverage = 0
+        # average of all trip overheads (overhead is TotalTicks/PredictedTicks)
+        self.totalTripOverheadAverage = 0
 
     # @todo on shortest path possible -> minimal value
 
-    @classmethod
-    def applyCarCounter(cls):
+    def applyCarCounter(self):
         """ syncs the value of the carCounter to the SUMO simulation """
-        while len(CarRegistry.cars) < cls.totalCarCounter:
+        while len(self.cars) < self.totalCarCounter:
             # to less cars -> add new
-            c = Car("car-" + str(CarRegistry.carIndexCounter))
-            cls.carIndexCounter += 1
-            cls.cars[c.id] = c
+            c = Car("car-" + str(self.carIndexCounter),self)
+            self.carIndexCounter += 1
+            self.cars[c.id] = c
             c.addToSimulation(0, True)
-        while len(CarRegistry.cars) > cls.totalCarCounter:
+        while len(self.cars) > self.totalCarCounter:
             # to many cars -> remove cars
-            (k, v) = CarRegistry.cars.popitem()
+            (k, v) = self.cars.popitem()
             v.remove()
 
-    @classmethod
-    def findById(cls, carID):
+    def findById(self, carID):
         """ returns a car by a given carID """
         try:
-            return CarRegistry.cars[carID]  # type: app.entitiy.Car
+            return self.cars[carID]  # type: app.entitiy.Car
         except:
             return NullCar()
 
-    @classmethod
-    def do_epos_planning(cls, tick):
+    def do_epos_planning(self, tick):
         prepare_epos_input_data_folders()
 
         cars_to_indexes = {}
         i = 0
-        for car_id, car in CarRegistry.cars.iteritems():
+        for car_id, car in self.cars.iteritems():
             if car.create_epos_output_files_based_on_current_location(tick, str(i)):
                 cars_to_indexes[car_id] = i
                 i += 1
@@ -75,24 +73,22 @@ class CarRegistry(object):
 
         Knowledge.time_of_last_EPOS_invocation = tick
         
-        cls.change_EPOS_config("conf/epos.properties", "numAgents=", "numAgents=" + str(number_of_epos_plans))
-        cls.change_EPOS_config("conf/epos.properties", "planDim=", "planDim=" + str(Network.edgesCount() * Knowledge.planning_steps))
-        cls.change_EPOS_config("conf/epos.properties", "alpha=", "alpha=" + str(Knowledge.alpha))
-        cls.change_EPOS_config("conf/epos.properties", "beta=", "beta=" + str(Knowledge.beta))
-        cls.change_EPOS_config("conf/epos.properties", "globalCostFunction=", "globalCostFunction=" + str(Knowledge.globalCostFunction))
+        self.change_EPOS_config("conf/epos.properties", "numAgents=", "numAgents=" + str(number_of_epos_plans))
+        self.change_EPOS_config("conf/epos.properties", "planDim=", "planDim=" + str(Network.edgesCount() * Knowledge.planning_steps))
+        self.change_EPOS_config("conf/epos.properties", "alpha=", "alpha=" + str(Knowledge.alpha))
+        self.change_EPOS_config("conf/epos.properties", "beta=", "beta=" + str(Knowledge.beta))
+        self.change_EPOS_config("conf/epos.properties", "globalCostFunction=", "globalCostFunction=" + str(Knowledge.globalCostFunction))
 
-        cls.run_epos_apply_results(False, cars_to_indexes, tick)
+        self.run_epos_apply_results(False, cars_to_indexes, tick)
 
-    @classmethod
-    def run_epos_apply_results(cls, first_invocation, cars_to_indexes, tick):
+    def run_epos_apply_results(self, first_invocation, cars_to_indexes, tick):
         p = subprocess.Popen(["java", "-jar", Config.epos_jar_path])
         print "Invoking EPOS at tick " + str(tick)
         p.communicate()
         print "EPOS run completed!"
-        cls.selectOptimalRoutes(get_output_folder_for_latest_EPOS_run(), first_invocation, cars_to_indexes)
+        self.selectOptimalRoutes(get_output_folder_for_latest_EPOS_run(), first_invocation, cars_to_indexes)
 
-    @classmethod
-    def selectOptimalRoutes(cls, output_folder_for_latest_run, first_invocation, cars_to_indexes):
+    def selectOptimalRoutes(self, output_folder_for_latest_run, first_invocation, cars_to_indexes):
 
         with open(output_folder_for_latest_run + '/selected-plans.csv', 'r') as results:
             line_id = 1
@@ -104,7 +100,7 @@ class CarRegistry(object):
 
         i = 0
         for car_id, epos_id in cars_to_indexes.iteritems():
-            c = cls.cars[car_id]
+            c = self.cars[car_id]
             with open('datasets/routes/agent_' + str(epos_id) + '.routes', 'r') as plans_file:
                 plans=plans_file.readlines()
             if Config.debug:
@@ -128,8 +124,7 @@ class CarRegistry(object):
                 else:
                     print "route changed"
 
-    @classmethod
-    def change_EPOS_config(cls, filename, searchExp, replaceExp):
+    def change_EPOS_config(self, filename, searchExp, replaceExp):
         for line in fileinput.input(filename, inplace=True):
             if searchExp in line:
                 line = replaceExp + "\n"
