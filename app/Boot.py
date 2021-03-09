@@ -46,3 +46,52 @@ def start(processID, parallelMode,useGUI):
     traci.close()
     sys.stdout.flush()
     return None
+
+
+def start_multiple(processID, parallelMode,useGUI):
+    def run_single():
+        # After the network is loaded, we init the router
+        CustomRouter.init()
+        # Start sumo in the background
+        SUMOConnector.start()
+        info("\n# SUMO-Application started OK!", Fore.GREEN)
+        # create simulation object
+        s1 = Simulation()
+        # Start the simulation
+        s1.start()
+        # Simulation ended, so we shutdown
+        info(Fore.RED + '# Shutdown' + Fore.RESET)
+        traci.close()
+
+    random.seed(Config.random_seed)
+
+    """ main entry point into the application """
+    Config.parallelMode = parallelMode
+    Config.sumoUseGUI = useGUI
+
+    info('#####################################', Fore.CYAN)
+    info('#        Starting TRAPP v0.1        #', Fore.CYAN)
+    info('#####################################', Fore.CYAN)
+
+    # Check if sumo is installed and available
+    SUMODependency.checkDeps()
+    info('# SUMO-Dependency check OK!', Fore.GREEN)
+
+    # Load the sumo map we are using into Python
+    Network.loadNetwork()
+    info(Fore.GREEN + "# Map loading OK! " + Fore.RESET)
+    info(Fore.CYAN + "# Nodes: " + str(Network.nodesCount()) + " / Edges: " + str(Network.edgesCount()) + Fore.RESET)
+
+    info("\n# starting first simulation", Fore.GREEN)
+    run_single()
+    info("\n# starting second simulation", Fore.GREEN)
+    run_single()
+    info("\n# finished simulations", Fore.GREEN)
+
+    sys.stdout.flush()
+    return None
+
+
+
+
+    
