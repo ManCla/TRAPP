@@ -55,8 +55,6 @@ def start(processID, parallelMode,useGUI):
 def start_multiple(processID, parallelMode,useGUI):
     def run_single():
 
-        random.seed(Config.random_seed)
-        
         # Start sumo in the background
         SUMOConnector.start()
         info("\n# SUMO-Application started OK!", Fore.GREEN)
@@ -88,6 +86,8 @@ def start_multiple(processID, parallelMode,useGUI):
     info(Fore.GREEN + "# Map loading OK! " + Fore.RESET)
     info(Fore.CYAN + "# Nodes: " + str(Network.nodesCount()) + " / Edges: " + str(Network.edgesCount()) + Fore.RESET)
         
+    random.seed(Config.random_seed)
+    
     ## open file for logging
     filename = "average_overhead_"+str(datetime.now())+".csv"
     csvfile = open(filename,'w')

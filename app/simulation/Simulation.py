@@ -106,7 +106,7 @@ class Simulation(object):
 
             CSVLogger.logEvent("streets", [self.tick] + [traci.edge.getLastStepVehicleNumber(edge.id)*self.carreg.vehicle_length / edge.length for edge in Network.routingEdges])
 
-            if (self.tick % 10) == 0:
+            if (self.tick % 600) == 0:
                 info("Simulation -> Step:" + str(self.tick) + " # Driving cars: " + str(
                     traci.vehicle.getIDCount()) + "/" + str(
                     self.carreg.totalCarCounter) + " # avgTripOverhead: " + str(

@@ -11,7 +11,7 @@ debug = False
 # which seed to be used in the random functions, for repeatability
 random_seed = 1
 
-num_sims = 500
+num_sims = 200
 
 # The path to EPOS jar that is called from Python for planning
 # <path to EPOS jar>
