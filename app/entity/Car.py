@@ -5,8 +5,6 @@ import csv
 
 from app.Util import addToAverage
 from app.logging import CSVLogger
-from app.network.Network import Network
-#from app.routing.CustomRouter import CustomRouter
 from app.routing.RouterResult import RouterResult
 from app.adaptation import Knowledge
 from app.entity.CarHistory import history_prefs
@@ -17,7 +15,7 @@ class Car:
 
     preferences_list= ["min_length", "max_speed", "balanced"]
 
-    def __init__(self, id, cr, ctmrtr):
+    def __init__(self, id, cr, ctmrtr, ntw):
         # the string id
         self.id = id  # type: str
         # the rounds this car already drove
@@ -51,8 +49,9 @@ class Car:
 
         self.driver_preference = [key for key, value in sorted(history_prefs[self.id].iteritems(), key=lambda (k,v): (v,k))][0]
 
-        self.carreg = cr
-        self.custmrout = ctmrtr
+        self.carreg = cr        # car register object of this simulation
+        self.custmrout = ctmrtr # custom router object of this simulation
+        self.network = ntw      # network object of this simulation
 
     def setArrived(self, tick):
         """ car arrived at its target, so we add some statistic data """
@@ -94,10 +93,10 @@ class Car:
     def __createNewRoute(self, tick):
         """ creates a new route to a random target and uploads this route to SUMO """
         if self.targetID is None:
-            self.sourceID = Network.get_random_node_id_of_passenger_edge(random)
+            self.sourceID = self.network.get_random_node_id_of_passenger_edge(random)
         else:
             self.sourceID = self.targetID  # We start where we stopped
-        self.targetID = Network.get_random_node_id_of_passenger_edge(random)
+        self.targetID = self.network.get_random_node_id_of_passenger_edge(random)
         self.currentRouteID = self.id + "-" + str(self.rounds)
 
         try:
@@ -129,7 +128,7 @@ class Car:
                 print self.id + "\thas not yet started its trip and won't be considered in the optimization."
             return False
         previousEdgeID = route[route_index]
-        previousNodeID = Network.getEdgeIDsToNode(previousEdgeID).getID()
+        previousNodeID = self.network.getEdgeIDsToNode(previousEdgeID).getID()
 
         if previousNodeID == self.targetID:
             if Config.debug:
@@ -180,9 +179,9 @@ class Car:
             for i in range(Knowledge.planning_steps):
                 if i< len(all_routes):
                     d = all_routes[i]
-                    big_row += [d[edge.id] if edge.id in d else 0 for edge in Network.routingEdges]
+                    big_row += [d[edge.id] if edge.id in d else 0 for edge in self.network.routingEdges]
                 else:
-                    big_row += [0 for edge in Network.routingEdges]
+                    big_row += [0 for edge in self.network.routingEdges]
 
             plans_writer.writerow(big_row)
 
@@ -192,7 +191,7 @@ class Car:
             traci.vehicle.setRoute(self.id, self.currentRouterResult.route)
         else:
             currentEdgeID = traci.vehicle.getRoadID(self.id)
-            if currentEdgeID not in Network.edgeIds:
+            if currentEdgeID not in self.network.edgeIds:
                 currentEdgeID = traci.vehicle.getRoute(self.id)[traci.vehicle.getRouteIndex(self.id)]
             try:
                 currentRoute = self.currentRouterResult.route
