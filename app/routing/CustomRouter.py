@@ -2,15 +2,16 @@ from random import gauss
 
 from dijkstar import Graph, find_path
 
-from app.network.Network import Network
 from app.routing.RouterResult import RouterResult
 
 
 class CustomRouter(object):
     """ our own custom defined router """
 
-    def __init__(self):
-            # Empty starting references
+    def __init__(self, ntw):
+        # no need to store Network since it used only in init()
+
+        # Empty starting references
         self.edgeMap = None
         self.graph = None
 
@@ -31,7 +32,7 @@ class CustomRouter(object):
         """ set up the router using the already loaded network """
         self.graph = Graph()
         self.edgeMap = {}
-        for edge in Network.routingEdges:
+        for edge in ntw.routingEdges:
             self.edgeMap[edge.id] = edge
             self.graph.add_edge(edge.fromNodeID, edge.toNodeID,
                                 {'length': edge.length, 'maxSpeed': edge.maxSpeed,
