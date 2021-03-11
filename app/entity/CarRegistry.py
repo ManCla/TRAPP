@@ -2,7 +2,6 @@ import subprocess
 from app import Config
 import fileinput
 import sys, os
-from app.network.Network import Network
 
 from app.entity.Car import Car
 from app.Util import  prepare_epos_input_data_folders
@@ -21,7 +20,7 @@ class NullCar:
 class CarRegistry(object):
     """ central registry for all our cars we have in the sumo simulation """
 
-    def __init__(self):
+    def __init__(self, ntw):
         self.vehicle_length = 5
         # the total amount of cars that should be in the system
         self.totalCarCounter = Config.totalCarCounter
@@ -36,13 +35,16 @@ class CarRegistry(object):
         # average of all trip overheads (overhead is TotalTicks/PredictedTicks)
         self.totalTripOverheadAverage = 0
 
+        # instance of network of this simulaiton
+        self.network = ntw
+
     # @todo on shortest path possible -> minimal value
 
     def applyCarCounter(self,custmrout):
         """ syncs the value of the carCounter to the SUMO simulation """
         while len(self.cars) < self.totalCarCounter:
             # to less cars -> add new
-            c = Car("car-" + str(self.carIndexCounter),self,custmrout)
+            c = Car("car-" + str(self.carIndexCounter),self,custmrout,self.network)
             self.carIndexCounter += 1
             self.cars[c.id] = c
             c.addToSimulation(0, True)
@@ -74,7 +76,7 @@ class CarRegistry(object):
         Knowledge.time_of_last_EPOS_invocation = tick
         
         self.change_EPOS_config("conf/epos.properties", "numAgents=", "numAgents=" + str(number_of_epos_plans))
-        self.change_EPOS_config("conf/epos.properties", "planDim=", "planDim=" + str(Network.edgesCount() * Knowledge.planning_steps))
+        self.change_EPOS_config("conf/epos.properties", "planDim=", "planDim=" + str(self.network.edgesCount() * Knowledge.planning_steps))
         self.change_EPOS_config("conf/epos.properties", "alpha=", "alpha=" + str(Knowledge.alpha))
         self.change_EPOS_config("conf/epos.properties", "beta=", "beta=" + str(Knowledge.beta))
         self.change_EPOS_config("conf/epos.properties", "globalCostFunction=", "globalCostFunction=" + str(Knowledge.globalCostFunction))
