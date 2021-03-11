@@ -54,14 +54,19 @@ def start(processID, parallelMode,useGUI):
 
 def start_multiple(processID, parallelMode,useGUI):
     def run_single():
-
+        # Load the sumo map we are using into Python
+        ntw = Network()    # create obj
+        ntw.loadNetwork()  # load map
+        info(Fore.GREEN + "# Map loading OK! " + Fore.RESET)
+        info(Fore.CYAN + "# Nodes: " + str(ntw.nodesCount()) + " / Edges: " + str(ntw.edgesCount()) + Fore.RESET)
+    
         # Start sumo in the background
         SUMOConnector.start()
         info("\n# SUMO-Application started OK!", Fore.GREEN)
         #create curstom router for simulation
-        cr = CustomRouter()
+        cr = CustomRouter(ntw)
         # create simulation object
-        s = Simulation(cr)
+        s = Simulation(cr, ntw)
         # Start the simulation
         avg_ovh = s.start()
         print avg_ovh
@@ -69,24 +74,21 @@ def start_multiple(processID, parallelMode,useGUI):
         traci.close()
         return avg_ovh
 
+
     """ main entry point into the application """
     Config.parallelMode = parallelMode
     Config.sumoUseGUI = useGUI
 
+    # set random seed
+    random.seed(Config.random_seed)
+    
     info('#####################################', Fore.CYAN)
     info('#        Starting TRAPP v0.1        #', Fore.CYAN)
     info('#####################################', Fore.CYAN)
     
     # Check if sumo is installed and available
     SUMODependency.checkDeps()
-    info('# SUMO-Dependency check OK!', Fore.GREEN)
-
-    # Load the sumo map we are using into Python
-    Network.loadNetwork()
-    info(Fore.GREEN + "# Map loading OK! " + Fore.RESET)
-    info(Fore.CYAN + "# Nodes: " + str(Network.nodesCount()) + " / Edges: " + str(Network.edgesCount()) + Fore.RESET)
-        
-    random.seed(Config.random_seed)
+    info('# SUMO-Dependency check OK!', Fore.GREEN)   
     
     ## open file for logging
     filename = "average_overhead_"+str(datetime.now())+".csv"
