@@ -1,7 +1,6 @@
 import json
 import traci
 import traci.constants as tc
-from app.network.Network import Network
 
 from colorama import Fore
 
@@ -28,8 +27,9 @@ class Simulation(object):
     # last tick time
     lastTick = current_milli_time()
 
-    def __init__(self, cstmrtr):
-        self.cr = cstmrtr # custom router object of this simulaiton
+    def __init__(self, cstmrtr, ntw):
+        self.cr = cstmrtr   # custom router object of this simulaiton
+        self.network = ntw  # Network object of this simulation
 
     def applyFileConfig(self):
         """ reads configs from a json and applies it at realtime to the simulation """
@@ -56,12 +56,13 @@ class Simulation(object):
         Util.remove_overhead_and_streets_files()
         Util.add_data_folder_if_missing()
 
-        CSVLogger.logEvent("streets", [edge.id for edge in Network.routingEdges])
+        CSVLogger.logEvent("streets", [edge.id for edge in self.network.routingEdges])
 
         Util.prepare_epos_input_data_folders()
 
         """ start the simulation """
-        self.carreg = CarRegistry()
+
+        self.carreg = CarRegistry(self.network)
         info("# Start adding initial cars to the simulation", Fore.MAGENTA)
         # apply the configuration from the json file
         self.applyFileConfig()
@@ -70,7 +71,7 @@ class Simulation(object):
         if Config.start_with_epos_optimization:
             Knowledge.time_of_last_EPOS_invocation = 0
             self.carreg.change_EPOS_config("conf/epos.properties", "numAgents=", "numAgents=" + str(Config.totalCarCounter))
-            self.carreg.change_EPOS_config("conf/epos.properties", "planDim=", "planDim=" + str(Network.edgesCount() * Knowledge.planning_steps))
+            self.carreg.change_EPOS_config("conf/epos.properties", "planDim=", "planDim=" + str(self.network.edgesCount() * Knowledge.planning_steps))
             self.carreg.change_EPOS_config("conf/epos.properties", "alpha=", "alpha=" + str(Knowledge.alpha))
             self.carreg.change_EPOS_config("conf/epos.properties", "beta=", "beta=" + str(Knowledge.beta))
             self.carreg.change_EPOS_config("conf/epos.properties", "globalCostFunction=", "globalCostFunction=" + str(Knowledge.globalCostFunction))
@@ -104,9 +105,9 @@ class Simulation(object):
                     print str(removedCarId) + "\treached its destination at tick " + str(self.tick)
                 self.carreg.findById(removedCarId).setArrived(self.tick)
 
-            CSVLogger.logEvent("streets", [self.tick] + [traci.edge.getLastStepVehicleNumber(edge.id)*self.carreg.vehicle_length / edge.length for edge in Network.routingEdges])
+            CSVLogger.logEvent("streets", [self.tick] + [traci.edge.getLastStepVehicleNumber(edge.id)*self.carreg.vehicle_length / edge.length for edge in self.network.routingEdges])
 
-            if (self.tick % 600) == 0:
+            if (self.tick % 5) == 0:
                 info("Simulation -> Step:" + str(self.tick) + " # Driving cars: " + str(
                     traci.vehicle.getIDCount()) + "/" + str(
                     self.carreg.totalCarCounter) + " # avgTripOverhead: " + str(
