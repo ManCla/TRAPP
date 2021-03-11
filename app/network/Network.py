@@ -36,8 +36,6 @@ class Network(object):
         self.__applyNetwork(parsedNetwork)
 
     def __applyNetwork(self, net):
-        # inject roadwork in random streets
-        self.random_roadwork(net)
         """ internal method for applying the values of a SUMO map """
         self.nodeIds = map(lambda x: x.getID(), net.getNodes())  # type: list[str]
         self.edgeIds = map(lambda x: x.getID(), net.getEdges(withInternal=False))  # type: list[str]
@@ -70,25 +68,3 @@ class Network(object):
     def get_random_node_id_of_passenger_edge(self, random):
         edge = random.choice(self.passenger_edges)
         return edge.getFromNode().getID()
-
-    # set a random edge max speed to zero to simulate road work
-    # edge docs https://sumo.dlr.de/pydoc/sumolib.net.edge.html
-    def random_roadwork(self,ntw):
-        for i in range(0,Config.number_roadwork):
-            edge = random.choice(ntw.getEdges(withInternal=False)) 
-            edge._speed =0.001
-            edge._length =100000
-            edge._lanes[0]._speed =0.001
-            edge._lanes[0]._length =100000
-            # edge._lanes[1]._speed =0.001
-            # edge._lanes[1]._length =100000
-            # print edge.getID()
-            # print edge._lanes[0]._speed
-            # print edge.getSpeed()
-        # for edg in self.passenger_edges:
-        #     edge = random.choice(self.passenger_edges) 
-        #     print edge.getID()
-        #     edge._speed =  0.001
-        #     edge._length =  100000
-        return 
-
