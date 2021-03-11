@@ -5,6 +5,9 @@ from app.routing.RoutingEdge import RoutingEdge
 
 import os, sys
 
+# used for random roadworks
+import random
+
 # import of SUMO_HOME
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
@@ -17,59 +20,75 @@ class Network(object):
     """ simply ready the network in its raw form and creates a router on this network """
 
     # empty references to start with
-    edges = None
-    nodes = None
-    nodeIds = None
-    edgeIds = None
-    passenger_edges = None
-    routingEdges = None
+    def __init__(self):
+        self.edges = None
+        self.nodes = None
+        self.nodeIds = None
+        self.edgeIds = None
+        self.passenger_edges = None
+        self.routingEdges = None
 
-    @classmethod
-    def loadNetwork(cls):
+    def loadNetwork(self):
         """ loads the network and applies the results to the Network static class """
         # parse the net using sumolib
         parsedNetwork = sumolib.net.readNet(Config.sumoNet)
         # apply parsing to the network
-        Network.__applyNetwork(parsedNetwork)
+        self.__applyNetwork(parsedNetwork)
 
-    @classmethod
-    def __applyNetwork(cls, net):
+    def __applyNetwork(self, net):
+        # inject roadwork in random streets
+        self.random_roadwork(net)
         """ internal method for applying the values of a SUMO map """
-        cls.nodeIds = map(lambda x: x.getID(), net.getNodes())  # type: list[str]
-        cls.edgeIds = map(lambda x: x.getID(), net.getEdges(withInternal=False))  # type: list[str]
-        cls.nodes = net.getNodes()
-        cls.edges = net.getEdges(withInternal=False)
-        cls.passenger_edges = [e for e in net.getEdges(withInternal=False) if e.allows("passenger")]
-        cls.routingEdges = map(lambda x: RoutingEdge(x), cls.passenger_edges)
+        self.nodeIds = map(lambda x: x.getID(), net.getNodes())  # type: list[str]
+        self.edgeIds = map(lambda x: x.getID(), net.getEdges(withInternal=False))  # type: list[str]
+        self.nodes = net.getNodes()
+        self.edges = net.getEdges(withInternal=False)
+        self.passenger_edges = [e for e in net.getEdges(withInternal=False) if e.allows("passenger")]
+        self.routingEdges = map(lambda x: RoutingEdge(x), self.passenger_edges)
 
-    @classmethod
-    def nodesCount(cls):
+    def nodesCount(self):
         """ count the nodes """
-        return len(cls.nodes)
+        return len(self.nodes)
 
-    @classmethod
-    def edgesCount(cls):
+    def edgesCount(self):
         """ count the edges """
-        return len(cls.edges)
+        return len(self.edges)
 
-    @classmethod
-    def getEdgeFromNode(cls, edge):
+    def getEdgeFromNode(self, edge):
         return edge.getFromNode()
 
-    @classmethod
-    def getEdgeByID(cls, edgeID):
-        return [x for x in cls.edges if x.getID() == edgeID][0]
+    def getEdgeByID(self, edgeID):
+        return [x for x in self.edges if x.getID() == edgeID][0]
 
-    @classmethod
-    def getEdgeIDsToNode(cls, edgeID):
-        return cls.getEdgeByID(edgeID).getToNode()
+    def getEdgeIDsToNode(self, edgeID):
+        return self.getEdgeByID(edgeID).getToNode()
 
     # returns the edge position of an edge
-    @classmethod
-    def getPositionOfEdge(cls, edge):
+    def getPositionOfEdge(self, edge):
         return edge.getFromNode().getCoord()  # @todo average two
 
-    @classmethod
-    def get_random_node_id_of_passenger_edge(cls, random):
-        edge = random.choice(Network.passenger_edges)
+    def get_random_node_id_of_passenger_edge(self, random):
+        edge = random.choice(self.passenger_edges)
         return edge.getFromNode().getID()
+
+    # set a random edge max speed to zero to simulate road work
+    # edge docs https://sumo.dlr.de/pydoc/sumolib.net.edge.html
+    def random_roadwork(self,ntw):
+        for i in range(0,Config.number_roadwork):
+            edge = random.choice(ntw.getEdges(withInternal=False)) 
+            edge._speed =0.001
+            edge._length =100000
+            edge._lanes[0]._speed =0.001
+            edge._lanes[0]._length =100000
+            # edge._lanes[1]._speed =0.001
+            # edge._lanes[1]._length =100000
+            # print edge.getID()
+            # print edge._lanes[0]._speed
+            # print edge.getSpeed()
+        # for edg in self.passenger_edges:
+        #     edge = random.choice(self.passenger_edges) 
+        #     print edge.getID()
+        #     edge._speed =  0.001
+        #     edge._length =  100000
+        return 
+
