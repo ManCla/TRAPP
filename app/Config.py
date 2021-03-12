@@ -11,7 +11,7 @@ debug = False
 # which seed to be used in the random functions, for repeatability
 random_seed = 1
 
-num_sims = 3
+num_sims = 300
 
 # The path to EPOS jar that is called from Python for planning
 # <path to EPOS jar>
@@ -50,13 +50,13 @@ start_with_epos_optimization = False
 #### initialization of control action of outer adaptive loop ####
 
 # How frequently EPOS planning will be invoked (runtime-configurable parameter)
-planning_period = 50
+planning_period = 100
 
 # the number of steps to look in the future while planning
 planning_steps = 1
 
 # how long a planning step should be
-planning_step_horizon = 100
+planning_step_horizon = 50
 
 # double from [0, 1], unfairness
 alpha = 0
@@ -74,7 +74,7 @@ globalCostFunction="RMSE"
 ######################################
 
 # how often adaptation should be triggered
-adaptation_period = 50
+adaptation_period = 100
 
 # the actual adaptation logic. Possible values: "load_balancing", "avoid_overloaded_streets", "tune_planning_resolution"
 adaptation_strategy = "avoid_overloaded_streets"
