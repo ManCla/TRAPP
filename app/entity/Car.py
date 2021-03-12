@@ -47,7 +47,7 @@ class Car:
         # number of ticks since last reroute / arrival
         self.lastRerouteCounter = 0
 
-        # randomize drivers preferences
+        # randomize driver's preferences
         self.history_prefs = {'balanced'  : random.randint(0,99999999)/99999999, #0.073258121558857,
                               'max_speed' : random.randint(0,99999999)/99999999, #0.07833330770387299,
                               'min_length': random.randint(0,99999999)/99999999 #0.11768949797422781
