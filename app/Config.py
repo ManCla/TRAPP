@@ -11,7 +11,7 @@ debug = False
 # which seed to be used in the random functions, for repeatability
 random_seed = 1
 
-num_sims = 200
+num_sims = 3
 
 # The path to EPOS jar that is called from Python for planning
 # <path to EPOS jar>
@@ -34,10 +34,11 @@ sumoNet = "/Users/claudio/repositories-git/TRAPP/app/map/eichstaedt.net.xml"
 #### SIMULATION SETUP ####
 
 # The total number of cars we use in our simulation
-totalCarCounter = 500
+carsNumberBase  = 800
+carsNumberRange = 400
 
 # How long the simulation will run
-simulation_horizon = 500
+simulation_horizon = 1000
 
 ######################################
 ##### CONFIGURATION OF PLANNING ######
@@ -66,14 +67,14 @@ beta = 1
 # alpha*unfairness + beta*local_cost + (1-alpha-beta)*global_costs
 
 # Suggested values : "XCORR", VAR", "RSS", "RMSE"
-globalCostFunction="VAR"
+globalCostFunction="RMSE"
 
 ######################################
 #### CONFIGURATION OF ADAPTATION #####
 ######################################
 
 # how often adaptation should be triggered
-adaptation_period = 100
+adaptation_period = 50
 
 # the actual adaptation logic. Possible values: "load_balancing", "avoid_overloaded_streets", "tune_planning_resolution"
-adaptation_strategy = "load_balancing"
+adaptation_strategy = "avoid_overloaded_streets"

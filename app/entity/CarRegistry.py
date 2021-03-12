@@ -3,6 +3,9 @@ from app import Config
 import fileinput
 import sys, os
 
+#used for random number of cars
+import random
+
 from app.entity.Car import Car
 from app.Util import  prepare_epos_input_data_folders
 from app.Util import get_output_folder_for_latest_EPOS_run
@@ -23,7 +26,7 @@ class CarRegistry(object):
     def __init__(self, ntw):
         self.vehicle_length = 5
         # the total amount of cars that should be in the system
-        self.totalCarCounter = Config.totalCarCounter
+        self.totalCarCounter = Config.carsNumberBase + random.randint(0,Config.carsNumberRange)
         # always increasing counter for carIDs
         self.carIndexCounter = 0
         # list of all cars
