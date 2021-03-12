@@ -24,7 +24,7 @@ class AvoidOverLoadedStreets(Strategy):
     def plan(self, overloaded_streets):
         avoid_streets_signal = []
         for i in range(Knowledge.planning_steps):
-            avoid_streets_signal += [0 if edge.id in overloaded_streets else 1 for edge in Network.routingEdges]
+            avoid_streets_signal += [0 if edge.id in overloaded_streets else 1 for edge in Network.current_network.routingEdges]
         return avoid_streets_signal
 
     def execute(self, avoid_streets_signal):

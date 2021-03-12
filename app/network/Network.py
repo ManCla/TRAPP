@@ -18,9 +18,14 @@ else:
 
 class Network(object):
     """ simply ready the network in its raw form and creates a router on this network """
+    
+    # BAD FIX:  class variable that stores latest generated network object
+    # this makes it impossible to parallelize simulations
+    current_network = None
 
     # empty references to start with
     def __init__(self):
+
         self.edges = None
         self.nodes = None
         self.nodeIds = None
@@ -36,6 +41,7 @@ class Network(object):
         self.__applyNetwork(parsedNetwork)
 
     def __applyNetwork(self, net):
+        Network.current_network = self #BAD FIX PART 2
         """ internal method for applying the values of a SUMO map """
         self.nodeIds = map(lambda x: x.getID(), net.getNodes())  # type: list[str]
         self.edgeIds = map(lambda x: x.getID(), net.getEdges(withInternal=False))  # type: list[str]
