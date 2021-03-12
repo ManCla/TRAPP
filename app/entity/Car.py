@@ -7,7 +7,7 @@ from app.Util import addToAverage
 from app.logging import CSVLogger
 from app.routing.RouterResult import RouterResult
 from app.adaptation import Knowledge
-from app.entity.CarHistory import history_prefs
+
 from app import Config
 
 class Car:
@@ -47,7 +47,13 @@ class Car:
         # number of ticks since last reroute / arrival
         self.lastRerouteCounter = 0
 
-        self.driver_preference = [key for key, value in sorted(history_prefs[self.id].iteritems(), key=lambda (k,v): (v,k))][0]
+        # randomize drivers preferences
+        self.history_prefs = {'balanced'  : random.randint(0,99999999)/99999999, #0.073258121558857,
+                              'max_speed' : random.randint(0,99999999)/99999999, #0.07833330770387299,
+                              'min_length': random.randint(0,99999999)/99999999 #0.11768949797422781
+                               }
+
+        self.driver_preference = [key for key, value in sorted(self.history_prefs.iteritems(), key=lambda (k,v): (v,k))][0]
 
         self.carreg = cr        # car register object of this simulation
         self.custmrout = ctmrtr # custom router object of this simulation
@@ -143,7 +149,7 @@ class Car:
         router_res_length = self.custmrout.route_by_min_length(sourceID, targetID)
         if len(router_res_length.route) > 0:
             self.create_output_files(
-                history_prefs[self.id]["min_length"],
+                self.history_prefs["min_length"],
                 router_res_length.route,
                 self.find_occupancy_for_route(router_res_length.meta),
                 agent_ind)
@@ -151,7 +157,7 @@ class Car:
         router_res_speeds = self.custmrout.route_by_max_speed(sourceID, targetID)
         if len(router_res_speeds.route) > 0:
             self.create_output_files(
-                history_prefs[self.id]["max_speed"],
+                self.history_prefs["max_speed"],
                 router_res_speeds.route,
                 self.find_occupancy_for_route(router_res_speeds.meta),
                 agent_ind)
@@ -159,7 +165,7 @@ class Car:
         router_res_length_and_speeds = self.custmrout.minimalRoute(sourceID, targetID)
         if len(router_res_length_and_speeds.route) > 0:
             self.create_output_files(
-                history_prefs[self.id]["balanced"],
+                self.history_prefs["balanced"],
                 router_res_length_and_speeds.route,
                 self.find_occupancy_for_route(router_res_length_and_speeds.meta),
                 agent_ind)
