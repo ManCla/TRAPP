@@ -2,7 +2,7 @@ import app.Config as Config
 from app.adaptation.strategies.AvoidOverloadedStreets import AvoidOverLoadedStreets
 from app.adaptation.strategies.LoadBalancing import LoadBalancing
 from app.adaptation.strategies.TunePlanningResolution import TunePlanningResolution
-
+from app.adaptation.strategies.NoAdaptation import NoAdaptation
 
 def get_adaptation_stategy(tick):
 
@@ -12,3 +12,5 @@ def get_adaptation_stategy(tick):
         return AvoidOverLoadedStreets(tick)
     elif Config.adaptation_strategy == "tune_planning_resolution":
         return TunePlanningResolution(tick)
+    elif Config.adaptation_strategy == "no_adaptation":
+        return NoAdaptation(tick)
