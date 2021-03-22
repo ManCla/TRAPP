@@ -76,5 +76,6 @@ globalCostFunction="RMSE"
 # how often adaptation should be triggered
 adaptation_period = 100
 
-# the actual adaptation logic. Possible values: "load_balancing", "avoid_overloaded_streets", "tune_planning_resolution"
-adaptation_strategy = "avoid_overloaded_streets"
+# the actual adaptation logic. Possible values: "load_balancing", "avoid_overloaded_streets", 
+#                                               "tune_planning_resolution", "no_adaptation"
+adaptation_strategy = "no_adaptation"
