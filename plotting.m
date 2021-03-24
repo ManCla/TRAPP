@@ -1,11 +1,13 @@
 
-file_in = 'average_overhead_2021-03-12 18:16:34.555445.csv';
+file_in = 'average_overhead_2021-03-12 18:16:34.555445.csv'; % avoid overloaded
+file_in = 'average_overhead_2021-03-23 22:13:23.719924.csv'; % no adaptation
 
 file_out = 'maxima_growth_plot.csv';
 
 A = csvread(file_in,...
             1,0);
 
+figure
 histogram(A(:,2),70)
 
 
