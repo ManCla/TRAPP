@@ -83,7 +83,7 @@ class CarRegistry(object):
         self.change_EPOS_config("conf/epos.properties", "alpha=", "alpha=" + str(Knowledge.alpha))
         self.change_EPOS_config("conf/epos.properties", "beta=", "beta=" + str(Knowledge.beta))
         self.change_EPOS_config("conf/epos.properties", "globalCostFunction=", "globalCostFunction=" + str(Knowledge.globalCostFunction))
-
+        print Knowledge
         self.run_epos_apply_results(False, cars_to_indexes, tick)
 
     def run_epos_apply_results(self, first_invocation, cars_to_indexes, tick):
