@@ -117,9 +117,10 @@ class Simulation(object):
                 print("Simulation horizon reached!")
                 return str(self.carreg.totalTripOverheadAverage)
 
-            if (self.tick % Config.adaptation_period) == 0:
-                perform_adaptation(self.tick)
+            if Config.useEpos :
+                if (self.tick % Config.adaptation_period) == 0:
+                    perform_adaptation(self.tick)
 
-            if (self.tick % Knowledge.planning_period) == 0:
-                self.carreg.do_epos_planning(self.tick)
+                if (self.tick % Knowledge.planning_period) == 0:
+                    self.carreg.do_epos_planning(self.tick)
 

@@ -13,6 +13,9 @@ random_seed = 1
 
 num_sims = 300
 
+# if you want to use epos or run without any global optimization
+useEpos = False 
+
 # The path to EPOS jar that is called from Python for planning
 # <path to EPOS jar>
 epos_jar_path = "/Users/claudio/repositories-git/TRAPP/EPOS/release-0.0.1/epos-tutorial.jar"
@@ -78,4 +81,4 @@ adaptation_period = 100
 
 # the actual adaptation logic. Possible values: "load_balancing", "avoid_overloaded_streets", 
 #                                               "tune_planning_resolution", "no_adaptation"
-adaptation_strategy = "no_adaptation"
+adaptation_strategy = "avoid_overloaded_streets"
